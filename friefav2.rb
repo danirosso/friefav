@@ -25,8 +25,8 @@ def mainMenu(db)
   choice = nil
 
   loop do
-    menu = ['d','u','c','s','q']
-    puts "Do you want to [d]elete, [u]pdate, [c]check out or [s]ee the friends favorite lists?"
+    menu = ['a','d','u','c','s','q']
+    puts "Do you want to [a]dd a friend, [d]elete, [u]pdate, [c]check out or [s]ee the friends favorite lists?"
     choice = gets.chomp
     choice = choice.chr
     choice.downcase
@@ -34,6 +34,9 @@ def mainMenu(db)
   end
 
   case choice
+  when 'a'
+    puts "Add!"
+    addFriend(db)
   when 'd'
     puts "Delete!"
     removeFriend(db)
@@ -66,16 +69,24 @@ def addFriend (db)
 end
 
 def seeFriends(db)
-  page = 0
+  page = 0 
+  numberRows = nil
   loop do
     offset = page * 5
-    puts "#{offset}"
+    if offset < 0 
+      offset = 0
+    end
     friends = db.exec_params("SELECT * FROM friends ORDER BY id ASC LIMIT 5 OFFSET $1", [offset])
     friends.each do |friend|
       puts "ID: #{friend['id']} | Name: #{friend['name']}"
       puts "Album: #{friend['favorite_album']} | Book #{friend['favorite_book']}\n\n"
+      numberRows = friends.ntuples
     end
     page = paginator(db,page)
+    if numberRows < offset
+      page -=1
+      puts "We've ran out of friends to display, you can add more so this doesn't happen again D:"
+    end
   end
 end
 
@@ -137,13 +148,13 @@ def getId(db)
   end
   friends = db.exec_params("SELECT * FROM friends WHERE id = $1", [id])
   while friends.ntuples == 0
-  puts "Wrong ID, enter it again or leave it blank to go back to the main menu"
-  id = gets.chomp
-  if id.empty?
-    mainMenu(db)
-  end
-  friends = db.exec_params("SELECT * FROM friends WHERE id = $1", [id])
-  break if friends.ntuples != 0
+    puts "Wrong ID, enter it again or leave it blank to go back to the main menu"
+    id = gets.chomp
+    if id.empty?
+      mainMenu(db)
+    end
+    friends = db.exec_params("SELECT * FROM friends WHERE id = $1", [id])
+    break if friends.ntuples != 0
   end
   return friends
 end
@@ -166,8 +177,41 @@ end
 
 
 def updateFriend(db)
+  choice = nil
+  id = nil
   puts "It's nice to change once in a while!"
-  friends = getID(db)
+  friends = getId(db)
+  friends.each do |friend|
+    puts "Name: #{friend['name']} | Book: #{friend['favorite_book']} | Album: #{friend['favorite_album']}"
+    id = "#{friend['id']}" 
+  end
+  menu = ['a', 'b']
+  loop do
+    puts "Which favorite do you want to change? [a]lbum or [b]ook?"
+    choice = gets.chomp
+    if choice.empty?
+      mainMenu(db)
+    end
+    choice = choice.downcase
+    choice = choice[0]
+    break if menu.include?(choice)
+    puts "You have to select either [a]lbum or [b]ook, leave empty to go back to the main menu"
+  end
+  case choice
+  when 'a'
+    subject = "favorite_album"
+  when 'b'
+    subject = "favorite_book"
+  end
+  action = "update the #{subject}?"
+  choice = yesNo(action)
+  if choice == 'y'
+    puts "Enter the new name: "
+    newFav = gets.chomp
+    db.exec_params("UPDATE friends SET #{subject}  = $1  WHERE id = $2", [newFav, id])
+  else
+    mainMenu(db)
+  end
 end
 
 def checkOut(db)
