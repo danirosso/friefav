@@ -1,7 +1,10 @@
 require 'pg'
+user = %x[echo $USER]
+user = user.chomp
+
 db = PG.connect(
   dbname: 'friefavs',
-  user: 'rosso',
+  user: user ,
 )
 
 def initMenu
