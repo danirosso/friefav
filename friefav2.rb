@@ -3,6 +3,7 @@ db = PG.connect(
   dbname: 'friefavs',
   user: 'rosso',
 )
+
 def initMenu
   choice = nil
 
@@ -20,7 +21,7 @@ def initMenu
   return choice
 end
 
-def mainMenu
+def mainMenu(db)
   choice = nil
 
   loop do
@@ -35,17 +36,21 @@ def mainMenu
   case choice
   when 'd'
     puts "Delete!"
+    mainMenu(db)
   when 'e'
     puts "Edit!"
+    mainMenu(db)
   when 'r'
     puts "Read!"
+    mainMenu(db)
   when 's'
     puts "See!"
+    seeFriends(db)
   end
   return choice
 end
 
-def addFriend
+def addFriend (db)
   puts "Enter your name:"
   name = gets.chomp
   puts "Now, #{name} insert your favorite music album:"
@@ -60,14 +65,53 @@ def addFriend
   puts "I've saved your preferences in my database, you are now a friend (:"
 end
 
-
-
-choice = initMenu
-loop do
-  if choice == 'y'
-    mainMenu
-  else 
-    addFriend
-    choice == 'y'
+def seeFriends(db)
+  page = 0
+  loop do
+    offset = page * 5
+    puts "#{offset}"
+    see = db.exec_params("SELECT * FROM friends ORDER BY id ASC LIMIT 5 OFFSET $1", [offset])
+    see.each do |friend|
+      puts "ID: #{friend['id']} | Name: #{friend['name']}"
+      puts "Album: #{friend['favorite_album']} | Book #{friend['favorite_book']}\n\n"
+    end
+    page = paginator(db,page)
+   end
   end
-end
+
+def paginator (db, page)
+  menu = ['n', 'p', 'b']
+  choice = nil
+  loop do
+    puts "Do you want to see the [N]ext page, the [P]revious one or go [B]ack to the main menu?"
+    choice = gets.chomp
+    choice = choice.downcase
+    choice = choice [0]
+    break if menu.include?(choice)
+  end
+
+  case choice
+  when 'n'
+    page +=1
+  when 'p'
+    if page > 0
+      page -=1
+    else
+      page = 1
+    end
+    when 'b'
+      mainMenu(db)
+    end
+
+    return page
+  end
+
+  choice = initMenu
+  loop do
+    if choice == 'y'
+      mainMenu(db)
+    else 
+      addFriend(db)
+      mainMenu(db)
+    end
+  end
