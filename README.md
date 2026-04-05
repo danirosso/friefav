@@ -1,5 +1,8 @@
-This program uses postgresql and ruby to create and manage a database of friends.
+This program uses Postgresql and Ruby to create and manage a database of friends.
 It was made with the sole purpose of practicing what I've learned so far with these tools.
+
+It registers a friend by name and asks for their favorite book and music album, gives this
+information an id and uses it to build the database.
 
 To run it you would need:
 * postgresql
