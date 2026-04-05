@@ -1,11 +1,4 @@
-require 'pg'
-user = %x[echo $USER]
-user = user.chomp
-
-db = PG.connect(
-  dbname: 'friefavs',
-  user: user ,
-)
+require './db.rb'
 
 def initMenu
   choice = nil
@@ -82,14 +75,14 @@ def seeFriends(db)
     friends = db.exec_params("SELECT * FROM friends ORDER BY id ASC LIMIT 5 OFFSET $1", [offset])
     friends.each do |friend|
       puts "ID: #{friend['id']} | Name: #{friend['name']}"
-      puts "Album: #{friend['favorite_album']} | Book #{friend['favorite_book']}\n\n"
+      puts "Album: #{friend['favorite_album']} | Book: #{friend['favorite_book']}\n\n"
       numberRows = friends.ntuples
     end
-    page = paginator(db,page)
-    if numberRows < offset
+    if numberRows <= offset
       page -=1
       puts "We've ran out of friends to display, you can add more so this doesn't happen again D:"
     end
+    page = paginator(db,page)
   end
 end
 
@@ -212,6 +205,7 @@ def updateFriend(db)
     puts "Enter the new name: "
     newFav = gets.chomp
     db.exec_params("UPDATE friends SET #{subject}  = $1  WHERE id = $2", [newFav, id])
+    seeFriends(db)
   else
     mainMenu(db)
   end
