@@ -1,0 +1,17 @@
+This program uses postgresql and ruby to create and manage a database of friends.
+It was made with the sole purpose of practicing what I've learned so far with these tools.
+
+To run it you would need:
+* postgresql
+* ruby
+* the gem "pg"
+* a database owned by you with the name "friefavs", alternatively, you can change this parameters
+in db.rb.
+* Just create the table "friends" with  "setup.sql" and everything _should_ run fine.
+
+The program in itself if made of various functions that get called depending on the
+input of the user in the menu, it's very "dynamic", you can check out the list of friends
+added (with pagination!), update their preferences, delete an entry, see specfic friends by id
+and add new ones.
+
+This program is now being used as a CLI control for webfriefav, a online version of the same concept.
