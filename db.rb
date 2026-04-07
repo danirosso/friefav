@@ -1,5 +1,5 @@
 require 'pg'
-user = "%x[echo $USER]"
+user = %x[echo $USER]
 user = user.chomp
 
 def db
