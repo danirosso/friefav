@@ -22,7 +22,7 @@ def mainMenu(db)
 
   loop do
     menu = ['a','d','u','c','s','q']
-    puts "Do you want to [a]dd a friend, [d]elete, [u]pdate, [c]check out or [s]ee the friends favorite lists?"
+    puts "Do you want to [a]dd a friend, [d]elete, [u]pdate, [c]heck out or [s]ee the friends favorite lists?"
     choice = gets.chomp
     choice = choice.chr
     choice.downcase
@@ -78,11 +78,11 @@ def seeFriends(db)
       puts "Album: #{friend['favorite_album']} | Book: #{friend['favorite_book']}\n\n"
       numberRows = friends.ntuples
     end
-    if numberRows <= offset
+    page = paginator(db,page)
+    if numberRows < offset
       page -=1
       puts "We've ran out of friends to display, you can add more so this doesn't happen again D:"
     end
-    page = paginator(db,page)
   end
 end
 
@@ -218,6 +218,7 @@ def checkOut(db)
   friends.each do |friend|
     puts "Name: #{friend['name']} | Book: #{friend['favorite_book']} | Album: #{friend['favorite_album']}"
   end
+
   choice = yesNo(action)
   while choice == 'y'
     friends = getId(db)
@@ -226,9 +227,9 @@ def checkOut(db)
     end
     choice = yesNo(action)
     break if choice == 'n'
+    end
     mainMenu(db)
   end
-end
 
 
 choice = initMenu
